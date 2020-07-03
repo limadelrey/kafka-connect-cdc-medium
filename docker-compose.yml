@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  kafka:
+    container_name: bike-store-kafka
+    image: landoop/fast-data-dev:2.5
+    environment:
+      ADV_HOST: 127.0.0.1                       # Change to 192.168.99.100 if using Docker Toolbox
+      RUNTESTS: 0                               # Disable Running tests so the cluster starts faster
+      CONNECTORS: debezium-postgres             # Allows only described connectors
+      SAMPLEDATA: 0                             # Disable sample data topic creation
+      RUNNING_SAMPLEDATA: 0                     # Disable sample data
+    ports:
+      - 2181:2181                               # Zookeeper
+      - 3030:3030                               # Landoop UI
+      - 8081-8083:8081-8083                     # REST Proxy, Schema Registry, & Kafka Connect
+      - 9581-9585:9581-9585                     # JMX Ports
+      - 9092:9092                               # Kafka Broker
+    networks:
+      - bike-store
+
+  postgres:
+    container_name: bike-store-postgres
+    image: debezium/postgres:12-alpine
+    environment:
+      POSTGRES_DB: store                        # PostgreSQL database
+      POSTGRES_USER: postgres                   # PostgreSQL user
+      POSTGRES_PASSWORD: postgres               # PostgreSQL password
+    ports:
+      - 5432:5432
+    volumes:
+      - /{YOUR_FOLDER_LOCATION}/1-schema.sql:/docker-entrypoint-initdb.d/1-schema.sql
+      - /{YOUR_FOLDER_LOCATION}/2-data.sql:/docker-entrypoint-initdb.d/2-data.sql
+    networks:
+      - bike-store
+
+networks:
+  bike-store:
+    name: bike-store-network
