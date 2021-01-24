@@ -39,7 +39,7 @@ So, let's dig into it. The main goal is to capture database events and send them
 Since we're going to use Docker, you won't have to spend much time installing and configuring every piece of software on this list. This is specially important because it allows us to set up our infrastructure really fast in an isolated environment. However, if you don't have Docker yet, you'll have to download it and follow install instructions depending on your operating system.
 Moving on, we'll start by creating a Docker Compose that manages two services. The first one is our database running an image of PostgreSQL provided by Debezium. This image is based upon PostgreSQL 12 and adds a Debezium-specific logical decoding output plugin enabling to capture changes committed to the database. The second one is our message broker running an image of Kafka provided by Landoop. This image allows to set a full fledged Kafka installation on top of Zookeeper which already includes Kafka Connect and Confluent Schema Registry. You can find the final YAML file below:
 
-<p align="center"><a href="https://gist.github.com/limadelrey/ff120063cb262681b7ca88f395010849.js"/>Docker Compose (docker-compose.yml)</a></p>
+<p align="center"><a href="https://gist.github.com/limadelrey/342942865537cfeb17a75af10c94424a"/>Docker Compose (docker-compose.yml)</a></p>
 
 You may have noticed that we're starting our database container with a volume. This volume is used to mount two files on this container which then are going to be used as initialization scripts. This is important, because not only it allows us to provide an initial state by creating and seeding our tables, but also it allows Debezium's plugin to perform an initial snapshot of our database. Just don't forget to download both files and change volume's mount source to your local folder.
 
@@ -58,7 +58,7 @@ At this moment it should be possible to access Kafka Development Environment UI.
 
 By default, four system topics are created automatically. They are used to save not only schema and connector configurations, but also connector offsets and status, so no need to worry about managing this settings.
 The next step is to create a Kafka Connect source connector. In order to do so just use Kafka Connect UI. After accessing it, press "New" and choose "PostgresConnector" from the available options. This connector is in fact Debezium's PostgreSQL Connector and it should run the following properties:
-<p align="center"><a href="https://gist.github.com/limadelrey/25a485cad06a5e64930ffa257c9dae09.js"/>Source connector (bike-store-source-connector.properties)</a></p>
+<p align="center"><a href="https://gist.github.com/limadelrey/b7e678c5a87147958cfb3407ad82d1bb"/>Source connector (bike-store-source-connector.properties)</a></p>
 
 The source connector properties are pretty self-explanatory: given a PostgreSQL instance and its credentials, the connector is able to consume every message generated from the whitelisted tables just by listening to the database transaction log. Since the database is already populated, the connector performs an initial snapshot of the database, creating a topic for each table automatically with every single message ever recorded:
 <p align="center"><img width="50%" src="https://cdn-images-1.medium.com/max/1600/1*B6FZjuivVz8zqV8MI4w-pA.png"/></p>
